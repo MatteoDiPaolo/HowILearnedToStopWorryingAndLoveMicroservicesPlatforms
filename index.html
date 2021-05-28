@@ -45,7 +45,7 @@
 		<div class="slides">
 			<section>
 				<h3>How I Learned To Stop Worrying And Love Microservices Platforms</h3>
-				<small>Business Logic related code is not everything</small>
+				<small>Business logic related code is not everything</small>
 				<br>
 				<img style="margin: 0px !important; border: 0px !important; opacity: 0.8; background-color: transparent; box-shadow: none;"
 					height="300" data-src="./images/1.png" alt="...">
@@ -455,11 +455,79 @@ const updateShippingCost = subscription => async ({ body: integrationsShippingCo
 					<br>
 					<img height="400" data-src="/images/19.gif" alt="...">
 				</section>
+
+				<section>
+					<h2>Business logic flows</h2>
+					<img data-src="/images/20.png" alt="...">
+
+					<aside class="notes">
+						Input / output<br>
+						Data parsing and transformation<br>
+					</aside>
+				</section>
+
+				<section>
+					<h2>Integration Async</h2>
+					<pre style="font-size: 12px; margin-top: 0;"><code class="hljs js" style="word-wrap: break-word;">
+describe('[Integration-Tests] - V2 BUS - Shipping cost', async () => {
+	it('Should process integrations shipping cost', async () => {
+		const shippingCostType = integrationsShippingCost.shippingTableChargeBy
+		await busComponent.v2.integrations.publish('shippingCostUpdated')(integrationsShippingCost)
+		await sleep(500)
+
+		const storedShippingCost = await storeComponent.v2.shippingcosts.getShippingCostByType(shippingCostType)
+		expect(storedShippingCost).toEqual(ecommerceShippingCost)
+	})
+})
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Integration Sync</h2>
+					<pre style="font-size: 12px; margin-top: 0;"><code class="hljs js" style="word-wrap: break-word;">
+describe('[Integration-Tests] - V2 API - Endpoint: /v2/packages/{id}/translationsHistory', async () => {
+	it('Should retrieve translation history for requested package', async () => {
+		const response = await request.get(`/v2/packages/${translationData[0].id}/translationsHistory`);
+		expect(response.status).to.deep.equal(200);
+		expect(response.body).to.deep.equal(translationHistoryResponse);
+	});
+
+	it('Should return 404 if history for requested package does not exists', async () => {
+		const response = await request.get('/v2/packages/123/translationsHistory');
+		expect(response.status).to.deep.equal(404);
+		expect(response.body.message).to.deep.equal('Translation history for package 123 was not found');
+	});
+});
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Unit</h2>
+					<pre style="font-size: 12px; margin-top: 0;"><code class="hljs js" style="word-wrap: break-word;">
+describe('[Unit-Tests] - V2 - shipping costs parser', () => {
+	it('Should parse an integrations shipping cost', () => {
+		const result = parser(integrationsShippingCost)
+		expect(result).toEqual(ecommerceShippingCost)
+	})
+})
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Folders structure</h2>
+					<img data-src="/images/21.png" alt="...">
+					<img data-src="/images/22.png" alt="...">
+
+					<aside class="notes">
+						Input / output<br>
+						No problems in huge refactoring of spaghetti code<br>
+					</aside>
+				</section>
 			</section>
 
 			<section>
 				<h2>Thank you</h2>
-				<img height="300" data-src="/images/20.gif" alt="...">
+				<img height="300" data-src="/images/23.gif" alt="...">
 			</section>
 
 		</div>
